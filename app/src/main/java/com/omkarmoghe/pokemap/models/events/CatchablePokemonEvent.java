@@ -10,9 +10,11 @@ import java.util.List;
 public class CatchablePokemonEvent implements IEvent {
 
     private List<CatchablePokemon> catchablePokemon;
+    private boolean forNoti;
 
-    public CatchablePokemonEvent(List<CatchablePokemon> catchablePokemon) {
+    public CatchablePokemonEvent(List<CatchablePokemon> catchablePokemon,boolean forNoti) {
         this.catchablePokemon = catchablePokemon;
+        this.forNoti=forNoti;
     }
 
     public List<CatchablePokemon> getCatchablePokemon() {
@@ -21,5 +23,9 @@ public class CatchablePokemonEvent implements IEvent {
 
     public void setCatchablePokemon(List<CatchablePokemon> catchablePokemon) {
         this.catchablePokemon = catchablePokemon;
+    }
+
+    public boolean isForNoti() {
+        return forNoti;
     }
 }

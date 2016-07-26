@@ -9,11 +9,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.maps.model.LatLng;
 import com.omkarmoghe.pokemap.R;
 import com.omkarmoghe.pokemap.controllers.app_preferences.PokemapSharedPreferences;
@@ -22,7 +19,6 @@ import com.omkarmoghe.pokemap.controllers.net.NianticManager;
 import com.omkarmoghe.pokemap.models.events.CatchablePokemonEvent;
 import com.omkarmoghe.pokemap.views.MainActivity;
 import com.pokegoapi.api.map.pokemon.CatchablePokemon;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -40,6 +36,8 @@ public class PokemonNotificationService extends Service{
     private NianticManager nianticManager;
     private NotificationCompat.Builder builder;
     private PokemapSharedPreferences preffs;
+
+    private static long MINDELAY=5000;
 
 
     public PokemonNotificationService() {
@@ -61,7 +59,7 @@ public class PokemonNotificationService extends Service{
         locationManager = LocationManager.getInstance(this);
         nianticManager = NianticManager.getInstance();
 
-        updateRunnable = new UpdateRunnable(preffs.getServiceRefreshRate());
+        updateRunnable = new UpdateRunnable(preffs.getServiceRefreshRate()*1000);
         workThread = new Thread(updateRunnable);
 
         initBroadcastReciever();
@@ -123,6 +121,9 @@ public class PokemonNotificationService extends Service{
 
     @Subscribe
     public void onEvent(CatchablePokemonEvent event) {
+        if(!event.isForNoti()){
+            return;
+        }
         List<CatchablePokemon> catchablePokemon = event.getCatchablePokemon();
 
         LatLng location = locationManager.getLocation();
@@ -164,10 +165,15 @@ public class PokemonNotificationService extends Service{
         public void run() {
             while(isRunning){
                 try{
+
                     LatLng currentLocation = locationManager.getLocation();
 
                     if(currentLocation != null){
-                        nianticManager.getMapInformation(currentLocation.latitude,currentLocation.longitude,0);
+                        //SearchParams params = new SearchParams(SearchParams.DEFAULT_RADIUS * 3, new LatLng(currentLocation.latitude,currentLocation.longitude));
+//                        for(LatLng loc:params.getSearchArea()){
+//                            nianticManager.getMapInformation(loc.latitude,loc.longitude,0);
+//                        }
+                        nianticManager.getMapInformation2(currentLocation.latitude,currentLocation.longitude,0,3,true);
                     }else {
                         locationManager = LocationManager.getInstance(PokemonNotificationService.this);
                     }

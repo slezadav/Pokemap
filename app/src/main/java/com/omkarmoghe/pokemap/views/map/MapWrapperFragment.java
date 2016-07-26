@@ -1,7 +1,6 @@
 package com.omkarmoghe.pokemap.views.map;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,7 +16,6 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
@@ -38,18 +36,15 @@ import com.omkarmoghe.pokemap.R;
 import com.omkarmoghe.pokemap.controllers.app_preferences.PokemapAppPreferences;
 import com.omkarmoghe.pokemap.controllers.app_preferences.PokemapSharedPreferences;
 import com.omkarmoghe.pokemap.controllers.map.LocationManager;
+import com.omkarmoghe.pokemap.models.events.CatchablePokemonEvent;
 import com.omkarmoghe.pokemap.models.events.ClearMapEvent;
 import com.omkarmoghe.pokemap.models.events.PokestopsEvent;
-import com.omkarmoghe.pokemap.models.map.PokemonMarkerExtended;
-import com.omkarmoghe.pokemap.models.events.CatchablePokemonEvent;
 import com.omkarmoghe.pokemap.models.events.SearchInPosition;
+import com.omkarmoghe.pokemap.models.map.PokemonMarkerExtended;
 import com.omkarmoghe.pokemap.models.map.PokestopMarkerExtended;
 import com.omkarmoghe.pokemap.models.map.SearchParams;
-import com.omkarmoghe.pokemap.views.MainActivity;
 import com.pokegoapi.api.map.fort.Pokestop;
 import com.pokegoapi.api.map.pokemon.CatchablePokemon;
-import com.pokegoapi.util.Log;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -200,6 +195,7 @@ public class MapWrapperFragment extends Fragment implements OnMapReadyCallback,
             mGoogleMap.setMyLocationEnabled(true);
             mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), 15));
+            search(new LatLng(mLocation.getLatitude(),mLocation.getLongitude()));
         } else {
             showLocationFetchFailed();
         }
@@ -323,7 +319,7 @@ public class MapWrapperFragment extends Fragment implements OnMapReadyCallback,
                             .asBitmap()
                             .skipMemoryCache(false)
                             .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .into(new SimpleTarget<Bitmap>(120, 120) { // Width and height FIXME: Maybe get different sizes based on devices DPI? this need tests
+                            .into(new SimpleTarget<Bitmap>(80, 80) { // Width and height FIXME: Maybe get different sizes based on devices DPI? this need tests
                                 @Override
                                 public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
                                     //Setting marker since we got image
@@ -449,6 +445,10 @@ public class MapWrapperFragment extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onMapLongClick(LatLng position) {
+      search(position);
+    }
+
+    private void search(LatLng position){
         //Draw user position marker with circle
         drawMarkerWithCircle (position);
 
@@ -475,10 +475,10 @@ public class MapWrapperFragment extends Fragment implements OnMapReadyCallback,
 
             if(mPref.getShowScannedPlaces()) {
                 double radiusInMeters = 100.0;
-                int strokeColor = 0x4400CCFF; // outline
+                int strokeColor = 0x4400CCFF;   //0x4400CCFF; // outline
                 int shadeColor = 0x4400CCFF; // fill
 
-                SearchParams params = new SearchParams(SearchParams.DEFAULT_RADIUS * 3, new LatLng(position.latitude, position.longitude));
+                SearchParams params = new SearchParams(SearchParams.DEFAULT_RADIUS * 8, new LatLng(position.latitude, position.longitude));
                 List<LatLng> list = params.getSearchArea();
                 for (LatLng p : list) {
                     CircleOptions circleOptions = new CircleOptions().center(new LatLng(p.latitude, p.longitude)).radius(radiusInMeters).fillColor(shadeColor).strokeColor(strokeColor).strokeWidth(8);
